@@ -22,6 +22,7 @@ using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
+using osu.Game.Beatmaps.Drawables.Cards.Buttons;
 using osu.Game.Collections;
 using osu.Game.Database;
 using osu.Game.Graphics;
@@ -35,6 +36,7 @@ using osu.Game.Overlays.BeatmapSet;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Screens.OnlinePlay.Playlists;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Users.Drawables;
 using osuTK;
@@ -91,6 +93,7 @@ namespace osu.Game.Screens.OnlinePlay
         private Drawable showResultsButton;
         private Drawable editButton;
         private Drawable removeButton;
+        private Drawable playButton;
         private PanelBackground panelBackground;
         private FillFlowContainer mainFillFlow;
 
@@ -458,31 +461,35 @@ namespace osu.Game.Screens.OnlinePlay
             };
         }
 
-        private IEnumerable<Drawable> createButtons() => new[]
+        private IEnumerable<Drawable> createButtons()
         {
-            beatmap == null ? Empty() : new PlaylistDownloadButton(beatmap),
-            showResultsButton = new GrayButton(FontAwesome.Solid.ChartPie)
+            if (beatmap != null)
+            {
+                yield return new PlaylistDownloadButton(beatmap);
+                yield return playButton = new PlaylistPlayButton(beatmap.BeatmapSet);
+            }
+            yield return showResultsButton = new GrayButton(FontAwesome.Solid.ChartPie)
             {
                 Size = new Vector2(30, 30),
                 Action = () => RequestResults?.Invoke(Item),
                 Alpha = AllowShowingResults ? 1 : 0,
                 TooltipText = "View results"
-            },
-            editButton = new PlaylistEditButton
+            };
+            yield return editButton = new PlaylistEditButton
             {
                 Size = new Vector2(30, 30),
                 Alpha = AllowEditing ? 1 : 0,
                 Action = () => RequestEdit?.Invoke(Item),
                 TooltipText = CommonStrings.ButtonsEdit
-            },
-            removeButton = new PlaylistRemoveButton
+            };
+            yield return removeButton = new PlaylistRemoveButton
             {
                 Size = new Vector2(30, 30),
                 Alpha = AllowDeletion ? 1 : 0,
                 Action = () => RequestDeletion?.Invoke(Item),
                 TooltipText = "Remove from playlist"
-            },
-        };
+            };
+        }
 
         protected override bool OnClick(ClickEvent e)
         {
@@ -533,6 +540,18 @@ namespace osu.Game.Screens.OnlinePlay
             public PlaylistRemoveButton()
                 : base(FontAwesome.Solid.MinusSquare)
             {
+            }
+        }
+
+        private sealed partial class PlaylistPlayButton : PlayButton
+        {
+            private const float width = 50;
+
+            public PlaylistPlayButton(IBeatmapSetInfo beatmapSetInfo)
+                : base(beatmapSetInfo)
+            {
+                Size = new Vector2(width, 30);
+                Alpha = 0;
             }
         }
 
