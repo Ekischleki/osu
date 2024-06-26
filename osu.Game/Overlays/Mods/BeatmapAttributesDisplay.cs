@@ -8,13 +8,16 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets;
@@ -67,7 +70,6 @@ namespace osu.Game.Overlays.Mods
         private void load()
         {
             const float shear = ShearedOverlayContainer.SHEAR;
-
             LeftContent.AddRange(new Drawable[]
             {
                 starRatingDisplay = new StarRatingDisplay(default, animated: true)
@@ -76,14 +78,28 @@ namespace osu.Game.Overlays.Mods
                     Anchor = Anchor.CentreLeft,
                     Shear = new Vector2(-shear, 0),
                 },
-                bpmDisplay = new BPMDisplay
+                new BPMButton()
                 {
                     Origin = Anchor.CentreLeft,
                     Anchor = Anchor.CentreLeft,
-                    Shear = new Vector2(-shear, 0),
-                    AutoSizeAxes = Axes.Y,
-                    Width = 75,
-                }
+                    AutoSizeAxes = Axes.X,
+                    RelativeSizeAxes = Axes.Y,
+                    Padding = new MarginPadding()
+                    {
+                        Horizontal = 5
+                    },
+
+                    Child = bpmDisplay = new BPMDisplay
+                    {
+                          Origin = Anchor.Centre,
+                          Anchor = Anchor.Centre,
+                          Position = new(0),
+                          Shear = new Vector2(-shear, 0),
+                          AutoSizeAxes = Axes.Both,
+                          Padding = new MarginPadding(5)
+                    },
+                },
+
             });
 
             RightContent.Alpha = 0;
@@ -170,7 +186,6 @@ namespace osu.Game.Overlays.Mods
                 rate = mod.ApplyToRate(0, rate);
 
             bpmDisplay.Current.Value = FormatUtils.RoundBPM(BeatmapInfo.Value.BPM, rate);
-
             BeatmapDifficulty originalDifficulty = new BeatmapDifficulty(BeatmapInfo.Value.Difficulty);
 
             foreach (var mod in Mods.Value.OfType<IApplicableToDifficulty>())
@@ -195,8 +210,80 @@ namespace osu.Game.Overlays.Mods
             RightContent.FadeTo(Collapsed.Value && !IsHovered ? 0 : 1, transition_duration, Easing.OutQuint);
         }
 
+
+        public partial class BPMButton : OsuClickableContainer
+        {
+
+            public BPMButton()
+                : base(HoverSampleSet.Button) { }
+
+            private Box flash = null!;
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                Enabled.Value = true;
+                Add(new Container()
+                {
+                    CornerRadius = 7,
+                    CornerExponent = 2,
+                    Masking = true,
+                    RelativeSizeAxes = Axes.Both,
+                    Child = flash = new Box()
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Colour4.White,
+                        Alpha = 0,
+                    }
+                });
+            }
+
+
+            protected override bool OnHover(HoverEvent e)
+            {
+                Scheduler.AddOnce(updateState);
+                return base.OnHover(e);
+            }
+
+            protected override void OnHoverLost(HoverLostEvent e)
+            {
+                Scheduler.AddOnce(updateState);
+                base.OnHoverLost(e);
+            }
+
+            protected override bool OnClick(ClickEvent e)
+            {
+                Scheduler.AddOnce(updateState);
+                return base.OnClick(e);
+            }
+
+
+            private void updateState()
+            {
+                if (IsHovered)
+                {
+                    flash.FadeTo(0.1f, 15, Easing.OutCubic);
+                }
+                else if (Enabled.Value)
+                {
+                    flash.FadeTo(0.2f, 15, Easing.OutCubic);
+                }
+                else
+                {
+                    flash.FadeOut(15, Easing.OutCubic);
+
+                }
+            }
+        }
+
         public partial class BPMDisplay : RollingCounter<int>
         {
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                Masking = true;
+                CornerRadius = 5;
+            }
+
             protected override double RollingDuration => 250;
 
             protected override LocalisableString FormatCount(int count) => count.ToLocalisableString("0 BPM");
@@ -208,6 +295,12 @@ namespace osu.Game.Overlays.Mods
                 Font = OsuFont.Default.With(size: 20, weight: FontWeight.SemiBold),
                 UseFullGlyphHeight = false,
             };
+
+            protected override bool OnHover(HoverEvent e)
+            {
+
+                return base.OnHover(e);
+            }
         }
     }
 }
