@@ -288,6 +288,13 @@ namespace osu.Game.Rulesets
         /// <param name="settings">The <see cref="SettingsStore"/> to store the settings.</param>
         public virtual IRulesetConfigManager? CreateConfig(SettingsStore? settings) => null;
 
+
+        /// <summary>
+        /// Creates the <see cref="CommonRulesetConfigManager"/> for this <see cref="Ruleset"/>.
+        /// </summary>
+        /// <param name="settings">The <see cref="SettingsStore"/> to store the settings.</param>
+        public virtual CommonRulesetConfigManager CreateCommonConfig(SettingsStore? settings) => new(settings, RulesetInfo);
+
         /// <summary>
         /// A unique short name to reference this ruleset in online requests.
         /// </summary>
