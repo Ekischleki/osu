@@ -17,5 +17,12 @@ namespace osu.Game.Rulesets
         /// <param name="ruleset">The <see cref="Ruleset"/> to retrieve the <see cref="IRulesetConfigManager"/> for.</param>
         /// <returns>The <see cref="IRulesetConfigManager"/> defined by <paramref name="ruleset"/>, null if <paramref name="ruleset"/> doesn't define one.</returns>
         IRulesetConfigManager? GetConfigFor(Ruleset ruleset);
+
+        /// <summary>
+        /// Retrieves the <see cref="CommonRulesetConfigManager"/> for a <see cref="RulesetInfo"/>.
+        /// </summary>
+        /// <param name="ruleset">The <see cref="RulesetInfo"/> to retrieve the <see cref="IRulesetConfigManager"/> for.</param>
+        /// <returns>The <see cref="CommonRulesetConfigManager"/> attached to the </returns>
+        CommonRulesetConfigManager GetCommonConfigFor(Ruleset ruleset);
     }
 }

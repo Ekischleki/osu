@@ -17,6 +17,7 @@ namespace osu.Game.Rulesets
         private readonly RulesetStore rulesets;
 
         private readonly Dictionary<string, IRulesetConfigManager?> configCache = new Dictionary<string, IRulesetConfigManager?>();
+        private readonly Dictionary<string, CommonRulesetConfigManager> commonConfigCache = new Dictionary<string, CommonRulesetConfigManager>();
 
         public RulesetConfigCache(RealmAccess realm, RulesetStore rulesets)
         {
@@ -37,19 +38,24 @@ namespace osu.Game.Rulesets
                     continue;
 
                 configCache[ruleset.ShortName] = ruleset.CreateInstance().CreateConfig(settingsStore);
+                commonConfigCache[ruleset.ShortName] = ruleset.CreateInstance().CreateCommonConfig(settingsStore);
+
             }
         }
 
-        public IRulesetConfigManager? GetConfigFor(Ruleset ruleset)
+        private T getConfigFrom<T>(RulesetInfo ruleset, Dictionary<string, T> dict)
         {
             if (!IsLoaded)
-                throw new InvalidOperationException($@"Cannot retrieve {nameof(IRulesetConfigManager)} before {nameof(RulesetConfigCache)} has loaded");
-
-            if (!configCache.TryGetValue(ruleset.RulesetInfo.ShortName, out var config))
-                throw new InvalidOperationException($@"Attempted to retrieve {nameof(IRulesetConfigManager)} for an unavailable ruleset {ruleset.GetDisplayString()}");
+                throw new InvalidOperationException($@"Cannot retrieve {typeof(T).Name} before {nameof(RulesetConfigCache)} has loaded");
+            if (!dict.TryGetValue(ruleset.ShortName, out var config))
+                throw new InvalidOperationException($@"Attempted to retrieve {typeof(T).Name} for an unavailable ruleset {ruleset.GetDisplayString()}");
 
             return config;
         }
+
+        public IRulesetConfigManager? GetConfigFor(Ruleset ruleset) => getConfigFrom(ruleset.RulesetInfo, configCache);
+
+        public CommonRulesetConfigManager GetCommonConfigFor(Ruleset ruleset) => getConfigFrom(ruleset.RulesetInfo, commonConfigCache);
 
         protected override void Dispose(bool isDisposing)
         {

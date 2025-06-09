@@ -14,6 +14,10 @@ namespace osu.Game.Tests.Rulesets
     {
         private readonly ConcurrentDictionary<string, IRulesetConfigManager?> configCache = new ConcurrentDictionary<string, IRulesetConfigManager?>();
 
+        private readonly ConcurrentDictionary<string, CommonRulesetConfigManager> commonConfigCache = new ConcurrentDictionary<string, CommonRulesetConfigManager>();
+
+        public CommonRulesetConfigManager GetCommonConfigFor(Ruleset ruleset) => commonConfigCache.GetOrAdd(ruleset.ShortName, _ => ruleset.CreateCommonConfig(null));
+
         public IRulesetConfigManager? GetConfigFor(Ruleset ruleset) => configCache.GetOrAdd(ruleset.ShortName, _ => ruleset.CreateConfig(null));
     }
 }
