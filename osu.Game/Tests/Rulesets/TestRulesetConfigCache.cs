@@ -16,7 +16,7 @@ namespace osu.Game.Tests.Rulesets
 
         private readonly ConcurrentDictionary<string, CommonRulesetConfigManager> commonConfigCache = new ConcurrentDictionary<string, CommonRulesetConfigManager>();
 
-        public CommonRulesetConfigManager GetCommonConfigFor(Ruleset ruleset) => commonConfigCache.GetOrAdd(ruleset.ShortName, _ => ruleset.CreateCommonConfig(null));
+        public CommonRulesetConfigManager GetCommonConfigFor(RulesetInfo ruleset) => commonConfigCache.GetOrAdd(ruleset.ShortName, _ => new CommonRulesetConfigManager(null, ruleset));
 
         public IRulesetConfigManager? GetConfigFor(Ruleset ruleset) => configCache.GetOrAdd(ruleset.ShortName, _ => ruleset.CreateConfig(null));
     }

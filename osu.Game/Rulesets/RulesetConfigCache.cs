@@ -55,7 +55,7 @@ namespace osu.Game.Rulesets
 
         public IRulesetConfigManager? GetConfigFor(Ruleset ruleset) => getConfigFrom(ruleset.RulesetInfo, configCache);
 
-        public CommonRulesetConfigManager GetCommonConfigFor(Ruleset ruleset) => getConfigFrom(ruleset.RulesetInfo, commonConfigCache);
+        public CommonRulesetConfigManager GetCommonConfigFor(RulesetInfo ruleset) => getConfigFrom(ruleset, commonConfigCache);
 
         protected override void Dispose(bool isDisposing)
         {
