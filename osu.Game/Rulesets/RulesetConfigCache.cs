@@ -37,9 +37,9 @@ namespace osu.Game.Rulesets
                 if (string.IsNullOrEmpty(ruleset.ShortName))
                     continue;
 
-                configCache[ruleset.ShortName] = ruleset.CreateInstance().CreateConfig(settingsStore);
-                commonConfigCache[ruleset.ShortName] = ruleset.CreateInstance().CreateCommonConfig(settingsStore);
-
+                var rulesetInstance = ruleset.CreateInstance();
+                configCache[ruleset.ShortName] = rulesetInstance.CreateConfig(settingsStore);
+                commonConfigCache[ruleset.ShortName] = new CommonRulesetConfigManager(settingsStore, ruleset);
             }
         }
 
