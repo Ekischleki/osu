@@ -169,6 +169,8 @@ namespace osu.Game.Graphics.UserInterface
             };
         }
 
+        
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -274,6 +276,19 @@ namespace osu.Game.Graphics.UserInterface
                 base.OnHover(e);
                 return true; // Make sure only one nub shows hover effect at once.
             }
+        }
+
+        /// <summary>
+        /// Sets the range to a new lower and upper bound without affecting the previous bound's bindables.
+        /// 
+        /// </summary>
+        /// <param name="newLowerBound">The new lower limiting value</param>
+        /// <param name="newUpperBound">The new upper limiting value, which gets increased if it is smaller than the new lower bound given the min range</param>
+        public void SetRange(Bindable<double> newLowerBound, Bindable<double> newUpperBound)
+        {
+            LowerBoundSlider.Current.UnbindBindings();
+            UpperBoundSlider.Current = newUpperBound;
+            LowerBoundSlider.Current = newLowerBound;
         }
     }
 }

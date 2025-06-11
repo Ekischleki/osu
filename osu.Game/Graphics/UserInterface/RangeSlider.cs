@@ -129,6 +129,20 @@ namespace osu.Game.Graphics.UserInterface
             upperBound.Current.ValueChanged += max => lowerBound.Current.Value = Math.Min(max.NewValue - minRange, lowerBound.Current.Value);
         }
 
+
+        /// <summary>
+        /// Sets the range to a new lower and upper bound without affecting the previous bound's bindables.
+        /// 
+        /// </summary>
+        /// <param name="newLowerBound">The new lower limiting value</param>
+        /// <param name="newUpperBound">The new upper limiting value, which gets increased if it is smaller than the new lower bound given the min range</param>
+        public void SetRange(Bindable<double> newLowerBound, Bindable<double> newUpperBound)
+        {
+            lowerBound.Current.UnbindBindings();
+            upperBound.Current = newUpperBound;
+            lowerBound.Current = newLowerBound;
+        }
+
         private partial class LowerBoundSlider : BoundSlider
         {
             protected override void LoadComplete()
