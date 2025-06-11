@@ -25,6 +25,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Configuration;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Screens.Select.Filter;
 using osuTK;
@@ -53,6 +54,10 @@ namespace osu.Game.Screens.Select
         private Bindable<GroupMode> groupMode;
         private FilterControlTextBox searchTextBox;
         private CollectionDropdown collectionDropdown;
+        private RangeSlider difficultyRangeSlider;
+
+        [Resolved]
+        private IRulesetConfigCache rulesetConfigCache { get; set; } = null!;
 
         [CanBeNull]
         private FilterCriteria currentCriteria;
@@ -178,7 +183,7 @@ namespace osu.Game.Screens.Select
                                 Height = 40,
                                 Children = new Drawable[]
                                 {
-                                    new RangeSlider
+                                    difficultyRangeSlider = new RangeSlider
                                     {
                                         Anchor = Anchor.TopLeft,
                                         Origin = Anchor.TopLeft,
@@ -207,6 +212,14 @@ namespace osu.Game.Screens.Select
                     }
                 }
             };
+
+            ruleset.BindValueChanged(ruleset =>
+            {
+                var commonConfig = rulesetConfigCache.GetCommonConfigFor(ruleset.NewValue);
+                var lowerBound = commonConfig.GetBindable<double>(CommonRulesetConfig.DifficultyFilterLowerBound);
+                var upperBound = commonConfig.GetBindable<double>(CommonRulesetConfig.DifficultyFilterUpperBound);
+                difficultyRangeSlider.SetRange(lowerBound, upperBound);
+            }, true);
 
             config.BindWith(OsuSetting.ShowConvertedBeatmaps, showConverted);
             showConverted.ValueChanged += _ => updateCriteria();

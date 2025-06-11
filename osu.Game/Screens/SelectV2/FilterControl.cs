@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (ruleset) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -18,6 +18,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Localisation;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Configuration;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Screens.Select;
 using osu.Game.Screens.Select.Filter;
@@ -42,6 +43,9 @@ namespace osu.Game.Screens.SelectV2
 
         [Resolved]
         private IBindable<RulesetInfo> ruleset { get; set; } = null!;
+
+        [Resolved]
+        private IRulesetConfigCache rulesetConfigCache { get; set; } = null!;
 
         [Resolved]
         private IBindable<IReadOnlyList<Mod>> mods { get; set; } = null!;
@@ -179,9 +183,16 @@ namespace osu.Game.Screens.SelectV2
         protected override void LoadComplete()
         {
             base.LoadComplete();
+            //We need to do this so that if the new lower bound is higher than the old upper bound, the setting for the old upper bound doesn't get overwritten.
 
-            difficultyRangeSlider.LowerBound = config.GetBindable<double>(OsuSetting.DisplayStarsMinimum);
-            difficultyRangeSlider.UpperBound = config.GetBindable<double>(OsuSetting.DisplayStarsMaximum);
+            ruleset.BindValueChanged(ruleset =>
+            {
+                var commonConfig = rulesetConfigCache.GetCommonConfigFor(ruleset.NewValue);
+                var lowerBound = commonConfig.GetBindable<double>(CommonRulesetConfig.DifficultyFilterLowerBound);
+                var upperBound = commonConfig.GetBindable<double>(CommonRulesetConfig.DifficultyFilterUpperBound);
+                difficultyRangeSlider.SetRange(lowerBound, upperBound);
+            }, true);
+
             config.BindWith(OsuSetting.ShowConvertedBeatmaps, showConvertedBeatmapsButton.Active);
             config.BindWith(OsuSetting.SongSelectSortingMode, sortDropdown.Current);
             config.BindWith(OsuSetting.SongSelectGroupMode, groupDropdown.Current);
